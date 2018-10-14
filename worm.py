@@ -182,8 +182,7 @@ for host in networkHosts:
 	
 	# Try to attack this host
 	sshInfo =  attackSystem(host)
-	
-	print sshInfo
+
 	
 	# Did the attack succeed?
 	if sshInfo:
