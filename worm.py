@@ -1,3 +1,11 @@
+#Assignment 1
+#Group members: 
+#	Gyromee Hatcher
+#	Kenny Chao
+#	Mevin Chen
+#	Meng-Shen Kuan
+##################################################################
+
 import paramiko
 import sys
 import socket
