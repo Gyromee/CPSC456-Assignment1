@@ -5,8 +5,7 @@ import nmap
 import netinfo
 import os
 import fcntl
-import struct 
-import string
+import struct
 import subprocess
 
 # The list of credentials to attempt
